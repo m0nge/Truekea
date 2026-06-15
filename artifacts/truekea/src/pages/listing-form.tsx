@@ -32,6 +32,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { PhotoUploader } from "@/components/photo-uploader";
+import { LocationPicker } from "@/components/location-picker";
 import { CATEGORIES, CONDITION_LABELS } from "@/lib/constants";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
@@ -263,10 +264,10 @@ export default function ListingForm() {
                 control={form.control}
                 name="location"
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Ubicación / Barrio</FormLabel>
+                  <FormItem className="md:col-span-2">
+                    <FormLabel>Ubicación</FormLabel>
                     <FormControl>
-                      <Input placeholder="Ej. Palermo, CABA" {...field} />
+                      <LocationPicker value={field.value} onChange={field.onChange} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

@@ -95,7 +95,7 @@ export default function ListingDetail() {
       setLocation(`/login?returnTo=/listings/${listing.id}`);
       return;
     }
-    startConversation.mutate({ data: { listingId: listing.id } });
+    startConversation.mutate({ listingId: listing.id });
   };
 
   return (

@@ -1,16 +1,17 @@
 import { useEffect, useState, useRef } from "react";
 import { useRoute, useLocation, Link } from "wouter";
-import { useGetMessages, useSendMessage, getGetMessagesQueryKey, useGetConversations } from "@workspace/api-client-react";
+import { useGetMessages, useSendMessage, useGetConversations, useGetConversationReview } from "@workspace/api-client-react";
 import { useAuth } from "@workspace/replit-auth-web";
 import { Layout } from "@/components/layout";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Loader2, Send, ChevronLeft, AlertTriangle } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
+import { ReviewForm } from "@/components/review-form";
+import { StarRating } from "@/components/star-rating";
 
 export default function Chat() {
   const [, params] = useRoute("/messages/:id");
@@ -24,8 +25,13 @@ export default function Chat() {
   const { data: conversations } = useGetConversations({
     query: { enabled: isAuthenticated && !!conversationId }
   });
-  
+
   const conversation = conversations?.find(c => c.id === conversationId);
+  const isBuyer = conversation?.buyerId === user?.id;
+
+  const { data: existingReview } = useGetConversationReview(conversationId, {
+    query: { enabled: isAuthenticated && !!conversationId && conversation?.listingStatus === "sold" && isBuyer }
+  });
 
   const { data: messages, isLoading: messagesLoading } = useGetMessages(conversationId, {
     query: { 
@@ -171,13 +177,31 @@ export default function Chat() {
             )}
           </div>
           
-          <div className="p-3 bg-background border-t">
-            {conversation.listingStatus === 'sold' && !isSelling ? (
+          <div className="p-3 bg-background border-t space-y-3">
+            {conversation.listingStatus === 'sold' && isBuyer && !existingReview && (
+              <ReviewForm
+                conversationId={conversationId}
+                sellerName={conversation.sellerName}
+                onSuccess={() => {}}
+              />
+            )}
+
+            {conversation.listingStatus === 'sold' && isBuyer && existingReview && (
+              <div className="p-3 bg-muted/60 rounded-xl border flex flex-col items-center gap-1.5">
+                <p className="text-sm font-medium text-muted-foreground">Tu valoración</p>
+                <StarRating value={existingReview.rating} size="md" />
+                {existingReview.comment && (
+                  <p className="text-xs text-muted-foreground text-center">{existingReview.comment}</p>
+                )}
+              </div>
+            )}
+
+            {conversation.listingStatus === 'sold' && !isBuyer ? (
               <div className="p-3 bg-muted rounded-md flex items-center justify-center gap-2 text-sm text-muted-foreground">
                 <AlertTriangle className="h-4 w-4 text-orange-500" />
                 <p>El artículo ha sido vendido. El chat está cerrado.</p>
               </div>
-            ) : (
+            ) : conversation.listingStatus !== 'sold' ? (
               <form onSubmit={handleSend} className="flex items-end gap-2">
                 <Input
                   value={content}
@@ -195,7 +219,7 @@ export default function Chat() {
                   {sendMessage.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
                 </Button>
               </form>
-            )}
+            ) : null}
           </div>
         </Card>
       </div>

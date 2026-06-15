@@ -21,6 +21,8 @@ tags:
     description: Messages within a conversation.
   - name: Stats
     description: Marketplace stats and aggregations.
+  - name: Reviews
+    description: Seller ratings and reviews.
 paths:
   /healthz:
     get:
@@ -579,6 +581,89 @@ paths:
               schema:
                 $ref: '#/components/schemas/MarketplaceStats'
 
+  /reviews:
+    post:
+      tags: [Reviews]
+      operationId: createReview
+      summary: Create a review for a seller
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReviewInput'
+      responses:
+        '201':
+          description: Review created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Review'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '409':
+          description: Review already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+
+  /reviews/conversation/{conversationId}:
+    get:
+      tags: [Reviews]
+      operationId: getConversationReview
+      summary: Get review for a specific conversation (null if none)
+      parameters:
+        - name: conversationId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Review or null
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Review'
+                  - type: 'null'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+
+  /reviews/user/{userId}:
+    get:
+      tags: [Reviews]
+      operationId: getSellerReviews
+      summary: Get all reviews for a seller
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Seller reviews with stats
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SellerReviews'
+
 components:
   parameters:
     AuthorizationSessionHeader:
@@ -906,4 +991,61 @@ components:
         category:
           type: string
         count:
+          type: integer
+
+    Review:
+      type: object
+      required: [id, conversationId, listingId, reviewerId, reviewedUserId, rating, createdAt]
+      properties:
+        id:
+          type: integer
+        conversationId:
+          type: integer
+        listingId:
+          type: integer
+        reviewerId:
+          type: string
+        reviewedUserId:
+          type: string
+        rating:
+          type: integer
+          minimum: 1
+          maximum: 5
+        comment:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+          format: date-time
+        listingTitle:
+          type: ["string", "null"]
+        reviewerName:
+          type: ["string", "null"]
+        reviewerAvatar:
+          type: ["string", "null"]
+
+    ReviewInput:
+      type: object
+      required: [conversationId, rating]
+      properties:
+        conversationId:
+          type: integer
+        rating:
+          type: integer
+          minimum: 1
+          maximum: 5
+        comment:
+          type: string
+          maxLength: 500
+
+    SellerReviews:
+      type: object
+      required: [reviews, totalReviews]
+      properties:
+        reviews:
+          type: array
+          items:
+            $ref: '#/components/schemas/Review'
+        avgRating:
+          type: ["number", "null"]
+        totalReviews:
           type: integer

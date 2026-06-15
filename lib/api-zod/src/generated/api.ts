@@ -440,3 +440,75 @@ export const GetMarketplaceStatsResponse = zod.object({
 })
 
 
+/**
+ * @summary Create a review for a seller
+ */
+export const createReviewBodyRatingMax = 5;
+
+export const createReviewBodyCommentMax = 500;
+
+
+
+export const CreateReviewBody = zod.object({
+  "conversationId": zod.number(),
+  "rating": zod.number().min(1).max(createReviewBodyRatingMax),
+  "comment": zod.string().max(createReviewBodyCommentMax).optional()
+})
+
+
+/**
+ * @summary Get review for a specific conversation (null if none)
+ */
+export const GetConversationReviewParams = zod.object({
+  "conversationId": zod.coerce.number()
+})
+
+export const getConversationReviewResponseOneRatingMax = 5;
+
+
+
+export const GetConversationReviewResponse = zod.union([zod.object({
+  "id": zod.number(),
+  "conversationId": zod.number(),
+  "listingId": zod.number(),
+  "reviewerId": zod.string(),
+  "reviewedUserId": zod.string(),
+  "rating": zod.number().min(1).max(getConversationReviewResponseOneRatingMax),
+  "comment": zod.string().nullish(),
+  "createdAt": zod.coerce.date(),
+  "listingTitle": zod.string().nullish(),
+  "reviewerName": zod.string().nullish(),
+  "reviewerAvatar": zod.string().nullish()
+}),zod.null()])
+
+
+/**
+ * @summary Get all reviews for a seller
+ */
+export const GetSellerReviewsParams = zod.object({
+  "userId": zod.coerce.string()
+})
+
+export const getSellerReviewsResponseReviewsItemRatingMax = 5;
+
+
+
+export const GetSellerReviewsResponse = zod.object({
+  "reviews": zod.array(zod.object({
+  "id": zod.number(),
+  "conversationId": zod.number(),
+  "listingId": zod.number(),
+  "reviewerId": zod.string(),
+  "reviewedUserId": zod.string(),
+  "rating": zod.number().min(1).max(getSellerReviewsResponseReviewsItemRatingMax),
+  "comment": zod.string().nullish(),
+  "createdAt": zod.coerce.date(),
+  "listingTitle": zod.string().nullish(),
+  "reviewerName": zod.string().nullish(),
+  "reviewerAvatar": zod.string().nullish()
+})),
+  "avgRating": zod.number().nullish(),
+  "totalReviews": zod.number()
+})
+
+

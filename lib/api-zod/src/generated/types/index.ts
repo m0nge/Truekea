@@ -34,5 +34,8 @@ export * from './message';
 export * from './messageInput';
 export * from './mobileTokenExchangeRequest';
 export * from './mobileTokenExchangeSuccess';
+export * from './review';
+export * from './reviewInput';
+export * from './sellerReviews';
 export * from './uploadUrlRequest';
 export * from './uploadUrlResponse';

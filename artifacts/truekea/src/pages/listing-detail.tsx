@@ -1,4 +1,4 @@
-import { useGetListing, useUpdateListingStatus, getGetListingQueryKey, useStartOrGetConversation, useDeleteListing } from "@workspace/api-client-react";
+import { useGetListing, useUpdateListingStatus, getGetListingQueryKey, useStartOrGetConversation, useDeleteListing, useGetSellerReviews } from "@workspace/api-client-react";
 import { useAuth } from "@workspace/replit-auth-web";
 import { useRoute, Link, useLocation } from "wouter";
 import { Layout } from "@/components/layout";
@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { STATUS_COLORS, STATUS_LABELS, CONDITION_LABELS } from "@/lib/constants";
 import { MapPin, Loader2, Calendar, MessageSquare, Edit, AlertTriangle, ShieldCheck, Tag } from "lucide-react";
+import { RatingSummary } from "@/components/star-rating";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { useQueryClient } from "@tanstack/react-query";
@@ -60,6 +61,10 @@ export default function ListingDetail() {
         setLocation(`/messages/${conversation.id}`);
       }
     }
+  });
+
+  const { data: sellerReviews } = useGetSellerReviews(listing?.sellerId ?? "", {
+    query: { enabled: !!listing?.sellerId }
   });
 
   const [mainPhotoIndex, setMainPhotoIndex] = useState(0);
@@ -186,8 +191,13 @@ export default function ListingDetail() {
                 <AvatarFallback>{listing.sellerName?.charAt(0) || "U"}</AvatarFallback>
               </Avatar>
               <div>
-                <p className="text-sm font-medium">Vendedor</p>
+                <p className="text-sm font-medium text-muted-foreground">Vendedor</p>
                 <p className="font-bold">{listing.sellerName}</p>
+                <RatingSummary
+                  avgRating={sellerReviews?.avgRating}
+                  totalReviews={sellerReviews?.totalReviews ?? 0}
+                  size="sm"
+                />
               </div>
             </div>
 

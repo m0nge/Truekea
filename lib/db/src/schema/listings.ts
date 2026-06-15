@@ -44,3 +44,18 @@ export const messagesTable = pgTable("messages", {
 export const insertMessageSchema = createInsertSchema(messagesTable).omit({ id: true, createdAt: true });
 export type InsertMessage = z.infer<typeof insertMessageSchema>;
 export type Message = typeof messagesTable.$inferSelect;
+
+export const reviewsTable = pgTable("reviews", {
+  id: serial("id").primaryKey(),
+  conversationId: integer("conversation_id").notNull().unique(),
+  listingId: integer("listing_id").notNull(),
+  reviewerId: text("reviewer_id").notNull(),
+  reviewedUserId: text("reviewed_user_id").notNull(),
+  rating: integer("rating").notNull(), // 1-5
+  comment: text("comment"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const insertReviewSchema = createInsertSchema(reviewsTable).omit({ id: true, createdAt: true });
+export type InsertReview = z.infer<typeof insertReviewSchema>;
+export type Review = typeof reviewsTable.$inferSelect;

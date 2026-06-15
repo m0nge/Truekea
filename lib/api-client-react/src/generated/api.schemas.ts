@@ -236,6 +236,46 @@ export interface MarketplaceStats {
   categories: CategoryCount[];
 }
 
+export interface Review {
+  id: number;
+  conversationId: number;
+  listingId: number;
+  reviewerId: string;
+  reviewedUserId: string;
+  /**
+     * @minimum 1
+     * @maximum 5
+     */
+  rating: number;
+  /** @nullable */
+  comment?: string | null;
+  createdAt: string;
+  /** @nullable */
+  listingTitle?: string | null;
+  /** @nullable */
+  reviewerName?: string | null;
+  /** @nullable */
+  reviewerAvatar?: string | null;
+}
+
+export interface ReviewInput {
+  conversationId: number;
+  /**
+     * @minimum 1
+     * @maximum 5
+     */
+  rating: number;
+  /** @maxLength 500 */
+  comment?: string;
+}
+
+export interface SellerReviews {
+  reviews: Review[];
+  /** @nullable */
+  avgRating?: number | null;
+  totalReviews: number;
+}
+
 /**
  * Opaque session token — `Bearer <sid>`.
  */
